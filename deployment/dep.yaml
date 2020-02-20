@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+#inicio informacion deployment
+metadata:
+  annotations:
+    kubernetes.io/change-cause: "cambio de puerto"
+  name: deployment-test
+  labels:
+    app: front
+#fin informacion deployment
+#inicio informacion replicaset
+spec:
+#  revisionHistoryLimit: 1
+  replicas: 3
+  selector:
+    matchLabels:
+      app: front
+  template:
+    metadata:
+      labels:
+        app: front
+#fin informacion replicaset
+#Inicio infoacion pods
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:nada
+        ports:
+        - containerPort: 80
