@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+#inicio informacion deployment
+metadata:
+  annotations:
+  name: frontend-k8s-practica
+  labels:
+    app: frontend
+#fin informacion deployment
+#inicio informacion replicaset
+spec:
+#  revisionHistoryLimit: 1
+  replicas: 3
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+#fin informacion replicaset
+#Inicio infoacion pods
+    spec:
+      containers:
+      - name: frontend
+        image: frontend-k8s-practica:v1
+        imagePullPolicy: IfNotPresent
+---
+## Creacion del servicio
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-k8s-practica
+  labels:
+    app: frontend
+spec:
+  type: NodePort
+  selector:
+    app: frontend
+  ports:
+    - protocol: TCP
+      port: 80
