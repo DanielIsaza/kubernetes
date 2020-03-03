@@ -1,0 +1,74 @@
+# codigo yaml obtenido de https://kubernetes.io/docs/tasks/administer-cluster/namespaces-walkthrough/
+# convertido a traves de https://www.json2yaml.com/
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev
+  labels:
+    name: dev
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: prod
+  labels:
+    name: prod
+---
+apiVersion: apps/v1
+kind: Deployment
+#inicio informacion deployment
+metadata:
+  name: deployment-dev
+  namespace: dev 
+  labels:
+    app: front
+#fin informacion deployment
+#inicio informacion replicaset
+spec:
+#  revisionHistoryLimit: 1
+  replicas: 2
+  selector:
+    matchLabels:
+      app: back-dev
+  template:
+    metadata:
+      labels:
+        app: back-dev
+#fin informacion replicaset
+#Inicio infoacion pods
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+#inicio informacion deployment
+metadata:
+  name: deployment-prod
+  namespace: prod
+  labels:
+    app: front
+#fin informacion deployment
+#inicio informacion replicaset
+spec:
+#  revisionHistoryLimit: 1
+  replicas: 4
+  selector:
+    matchLabels:
+      app: back
+  template:
+    metadata:
+      labels:
+        app: back
+#fin informacion replicaset
+#Inicio infoacion pods
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:alpine
+        ports:
+        - containerPort: 80

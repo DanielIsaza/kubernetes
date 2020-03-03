@@ -1,0 +1,9 @@
+# codigo yaml obtenido de https://kubernetes.io/docs/tasks/administer-cluster/namespaces-walkthrough/
+# convertido a traves de https://www.json2yaml.com/
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: desarrollo
+  labels:
+    name: desarrollo
