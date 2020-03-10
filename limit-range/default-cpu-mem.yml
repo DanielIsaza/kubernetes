@@ -1,0 +1,33 @@
+#https://kubernetes.io/docs/tasks/administer-cluster/manage-resources/memory-default-namespace/
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: desarrollo
+  labels:
+    name: desarrollo
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: mem-limit-range
+  namespace: desarrollo
+spec:
+  limits:
+  - default:
+      memory: 512Mi
+      cpu: 1
+    defaultRequest:
+      memory: 256Mi
+      cpu: 0.5
+    type: Container
+---
+apiVersion: v1
+kind: Pod
+metadata:
+ name: pdev
+ namespace: desarrollo
+spec:
+ containers:
+ - name: con1
+   image: nginx:alpine
