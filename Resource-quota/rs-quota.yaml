@@ -1,0 +1,58 @@
+#https://kubernetes.io/docs/tasks/administer-cluster/manage-resources/quota-memory-cpu-namespace/
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: uat
+  labels:
+    name: uat
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: res-quota
+  namespace: uat
+spec:
+  hard:
+    requests.cpu: "1"
+    requests.memory: 1Gi
+    limits.cpu: "2"
+    limits.memory: 2Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+#inicio informacion deployment
+metadata:
+  annotations:
+    kubernetes.io/change-cause: "cambio de puerto"
+  namespace: uat
+  name: deployment-test
+  labels:
+    app: front
+#fin informacion deployment
+#inicio informacion replicaset
+spec:
+#  revisionHistoryLimit: 1
+  replicas: 2
+  selector:
+    matchLabels:
+      app: front
+  template:
+    metadata:
+      labels:
+        app: front
+#fin informacion replicaset
+#Inicio infoacion pods
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:nada
+        ports:
+        - containerPort: 80
+        resources: 
+          requests:
+            memory: 500M
+            cpu: 500m
+          limits:
+            memory: 500M
+            cpu: 500m
