@@ -1,0 +1,89 @@
+#https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#add-configmap-data-to-a-volume
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+  labels:
+    app: front
+data:
+  nginx: |
+    server {
+      listen       80;
+      server_name  localhost;
+      location / {
+          root   /usr/share/nginx/html;
+          index  index.html index.htm;
+      }
+      error_page   500 502 503 504  /50x.html;
+      location = /50x.html {
+          root   /usr/share/nginx/html;
+      }
+    }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vars
+  labels:
+    app: front
+data:
+  dbhost: local.host
+  dbuser: devuser
+  script: |
+   echo DBHOST es $DBHOST Y dbuser es $DBUSER > /usr/share/nginx/html/test.html
+---
+apiVersion: apps/v1
+kind: Deployment
+#inicio informacion deployment
+metadata:
+  name: deployment-test
+  labels:
+    app: front
+#fin informacion deployment
+#inicio informacion replicaset
+spec:
+#  revisionHistoryLimit: 1
+  replicas: 1
+  selector:
+    matchLabels:
+      app: front
+  template:
+    metadata:
+      labels:
+        app: front
+#fin informacion replicaset
+#Inicio infoacion pods
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:alpine
+          env:
+          # Define the environment variable
+           - name: dbhost
+             valueFrom:
+              configMapKeyRef:
+                name: vars
+                key: dbhost
+           - name: dbuser
+             valueFrom:
+              configMapKeyRef:
+                name: vars
+                key: dbuser
+          volumeMounts:
+            - name: nginx-vol
+              mountPath: /etc/config
+            - name: vars-vol
+              mountPath: /opt
+      volumes:
+        - name: nginx-vol
+          configMap:
+            name: nginx-config
+            items:
+            - key: nginx
+              path: default.conf
+        - name: vars-vol
+          configMap:
+            name: vars
+            items:
+            - key: script
+              path: script.sh
