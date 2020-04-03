@@ -1,0 +1,68 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: task-pv-volume2
+  labels:
+    mysql: ready
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 3Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/home/administrador/repo/mysql"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: test-pvc #nombre a mencionar en los pods
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 3Gi
+  #se asigna el label del pv que se quiere trabajae
+  selector:
+    matchLabels:
+      mysql: ready
+---
+apiVersion: apps/v1
+kind: Deployment
+#inicio informacion deployment
+metadata:
+  annotations:
+    kubernetes.io/change-cause: "cambio de puerto"
+  name: mysql-test
+  labels:
+    app: mysql
+#fin informacion deployment
+#inicio informacion replicaset
+spec:
+#  revisionHistoryLimit: 1
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+#fin informacion replicaset
+#Inicio infoacion pods
+    spec:
+      volumes:
+      - name: vol-mysql #nombre usado en el contenedor
+        persistentVolumeClaim:
+          claimName: test-pvc #nombre del pvc
+      containers:
+      - name: mysql
+        image: mysql:5.7
+        env:
+        - name: MYSQL_ROOT_PASSWORD 
+          value: "12345678"
+        volumeMounts:
+        - mountPath: "/var/lib/mysql"
+          name: vol-mysql #nombre del volumen que se va montar

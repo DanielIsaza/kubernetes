@@ -24,6 +24,6 @@ spec:
     spec:
       containers:
       - name: nginx
-        image: nginx:nada
+        image: nginx:alpine
         ports:
         - containerPort: 80
