@@ -1,0 +1,20 @@
+#Iniciar minikube con el rbac habilitado
+minikube start --vm-driver=none --extra-config=apiserver.authorization-mode=RBAC
+
+#crear certificados
+openssl genrsa -out usuario.key 2048
+openssl req -new -key usuario.key -out usuario.csr -subj "/CN=usuario/O=Grupo" #solicitud de creación de un csr
+openssl x509 -req -in usuario.csr -CA /root/.minikube/ca.crt -CAkey /root/.minikube/ca.key -CAcreateserial -out usuario.crt -days 500 #dar validez al certificado del usuario
+openssl x509 -in usuario.crt -noout -text #validar el certificado
+
+# ambiente aislado
+kubectl config view | grep server
+
+#validar que funcione el certificado simulando otro sistema de archivos
+docker run --rm -ti -v $PWD:/test -w /test -v /root/.minikube/ca.crt:/ca.crt -v /usr/bin/kubectl:/usr/bin/kubectl alpine sh
+
+#configurar kubectl en el nuevo cliente para el nuevo usuario 
+kubectl config set-cluster minikube --server=https://ip:8443 ${kubectl cluster-info} --certificate-authority=/ca.crt
+kubectl config set-credencials usuario --client-cerfificate=usuario.crt --client-key=usuario.key
+kubectl config set-context usuario --cluster=minikube --user=usuario
+kubectl config use-context usuario
